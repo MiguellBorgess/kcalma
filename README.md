@@ -1,6 +1,6 @@
-# 🥗 KCALMA — Wiki do Projeto
+# 🥗 KCALMA
 
-Bem-vindo à Wiki do **KCALMA**, um aplicativo de acompanhamento alimentar focado em **contagem de calorias**, **visualização de dados** e **apoio inteligente com IA**, desenvolvido por estudantes de Sistemas de Informação da **UFU** para a disciplina **Processo e Desenvolvimento de Sistemas**.
+Bem-vindo ao README do **KCALMA**, um aplicativo de acompanhamento alimentar focado em **contagem de calorias**, **visualização de dados** e **apoio inteligente com IA**, desenvolvido por estudantes de Sistemas de Informação da **UFU** para a disciplina **Processo e Desenvolvimento de Sistemas**.
 
 ---
 
