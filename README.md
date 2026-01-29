@@ -90,28 +90,9 @@ Com base nesses dados, o sistema calcula o **IMC (Índice de Massa Corporal)**.
 
 1. Criar uma branch `feature/*`
 2. Desenvolver a funcionalidade
-3. Abrir PR para `develop`
-4. Push em `develop` gera automaticamente:
-
-   * Nova versão
-   * Branch `release/vX.Y`
-   * Release no GitHub
-   * PR para `main`
-5. Aprovação do PR → produção
-
----
-
-## 🤖 Automação (GitHub Actions)
-
-### Auto Release
-
-* Dispara ao fazer push na `develop`
-* Cria automaticamente:
-
-  * versão
-  * branch de release
-  * release no GitHub
-  * PR para `main`
+3. Push em `feature/*` gera automaticamente PR para `develop`
+4. Push em `develop` gera automaticamente  PR para `homolog`
+5. Push em `homolog` gera automaticamente  PR para produção (`main`)
 
 ---
 
@@ -120,8 +101,8 @@ Com base nesses dados, o sistema calcula o **IMC (Índice de Massa Corporal)**.
 Branches protegidas:
 
 * `main`
+* `homolog`
 * `develop`
-* `release/*`
 
 Regras aplicadas:
 
