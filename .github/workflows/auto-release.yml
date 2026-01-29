@@ -1,24 +1,70 @@
-name: PR Develop to Homolog
+name: Auto Release (Sequential)
 
 on:
   push:
     branches:
       - develop
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  create-pr:
+  release:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Create Pull Request
+      - name: Get last tag
+        id: last_tag
+        run: |
+          last_tag=$(git tag --sort=creatordate | tail -n 1)
+          if [ -z "$last_tag" ]; then
+            last_tag="v0.0"
+          fi
+          echo "tag=$last_tag" >> $GITHUB_OUTPUT
+
+      - name: Calculate next version
+        id: next_version
+        run: |
+          version=${{ steps.last_tag.outputs.tag }}
+          version=${version#v}
+
+          major=$(echo $version | cut -d. -f1)
+          minor=$(echo $version | cut -d. -f2)
+
+          if [ "$minor" -lt 9 ]; then
+            minor=$((minor+1))
+          else
+            major=$((major+1))
+            minor=0
+          fi
+
+          echo "version=v$major.$minor" >> $GITHUB_OUTPUT
+
+      - name: Create release branch
+        run: |
+          git checkout -b release/${{ steps.next_version.outputs.version }}
+          git push origin release/${{ steps.next_version.outputs.version }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.next_version.outputs.version }} \
+            --title "Release ${{ steps.next_version.outputs.version }}" \
+            --notes "Release automática criada a partir da branch develop."
+
+      - name: Open PR to main
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr create \
-            --base homolog \
-            --head develop \
-            --title "[AUTO] Promote develop to homolog" \
-            --body "Pull Request automático para homologação."
+            --base main \
+            --head release/${{ steps.next_version.outputs.version }} \
+            --title "[AUTO] Release ${{ steps.next_version.outputs.version }} → main" \
+            --body "Pull Request automático da release para produção."
