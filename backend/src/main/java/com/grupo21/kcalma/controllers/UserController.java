@@ -2,14 +2,16 @@ package com.grupo21.kcalma.controllers;
 
 import com.grupo21.kcalma.domain.user.WeightRecord;
 import com.grupo21.kcalma.dto.ChangePasswordRequestDTO;
+import com.grupo21.kcalma.dto.DeleteWeightRecordDTO;
 import com.grupo21.kcalma.dto.UserDetailsResponseDTO;
-import com.grupo21.kcalma.dto.WeightRecordDTO;
+import com.grupo21.kcalma.dto.AddWeightRecordDTO;
 import com.grupo21.kcalma.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -32,10 +34,26 @@ public class UserController {
     }
 
     @PostMapping("/add-weight")
-        public ResponseEntity<String> addWeight(@RequestBody WeightRecordDTO data, Principal connectedUser) {
+        public ResponseEntity<WeightRecord> addWeight(@RequestBody AddWeightRecordDTO data, Principal connectedUser) {
 
         WeightRecord record = userService.addWeightRecord(data, connectedUser);
 
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok(record);
+    }
+
+    @DeleteMapping("/del-weight")
+    public ResponseEntity<Void> deleteWeight(@RequestBody DeleteWeightRecordDTO data, Principal connectedUser) {
+
+        userService.DeleteWeightRecord(data, connectedUser);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/weight-records")
+    public ResponseEntity<List<WeightRecord>> getWeightRecords(Principal connectedUser){
+
+        List<WeightRecord> records = userService.getWeightRecords(connectedUser);
+
+        return  ResponseEntity.ok(records);
     }
 }
