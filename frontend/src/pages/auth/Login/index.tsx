@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 
 export function Login() {
     const context = useContext(Context)
+
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -17,8 +18,18 @@ export function Login() {
         setFormData(prev => ({ ...prev, [field]: value }));
     }
 
-    function handleSubmit() {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event?.preventDefault()
 
+        try {
+            await context?.handleLogin(formData.email, formData.password)
+
+            if (!context?.authenticated) {
+                console.log("eta padrin")
+            }
+        } catch (error) {
+            console.log("deu erro")
+        }
     }
 
     if (!context?.authenticated) {

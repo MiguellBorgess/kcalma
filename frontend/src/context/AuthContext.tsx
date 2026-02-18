@@ -9,7 +9,7 @@ interface AuthProviderProps {
 interface AuthContext {
     authenticated: boolean
     loading: boolean
-    handleLogin: (email: string, password: string) => void
+    handleLogin: (email: string, password: string) => Promise<void>
     handleLogout: () => void
 }
 
