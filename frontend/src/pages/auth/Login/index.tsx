@@ -14,12 +14,28 @@ export function Login() {
         password: '',
     });
 
+    function validate() {
+        var isError = false;
+
+        if (!formData.email) {
+            isError=true
+        }
+
+        if (!formData.password) {
+            isError=true
+        }
+
+        return !isError;
+    }
+
     function handleChange(field:string, value:string) {
         setFormData(prev => ({ ...prev, [field]: value }));
     }
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event?.preventDefault()
+
+        if (!validate()) return;
 
         try {
             await context?.handleLogin(formData.email, formData.password)
