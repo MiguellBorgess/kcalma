@@ -5,46 +5,65 @@ import { Label } from "@/components/ui/label"
 import { Lock, Mail } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import axios from "axios"
+import { toast } from "sonner"
 
 export function Login() {
     const context = useContext(Context)
+    const [errors, setErrors] = useState<Record<string, string>>({})
+    const [isLoading, setIsLoading] = useState(false)
 
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-    });
+    })
 
     function validate() {
-        var isError = false;
+        const newErrors: Record<string, string> = {}
 
-        if (!formData.email) {
-            isError=true
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email é obrigatório'
         }
 
         if (!formData.password) {
-            isError=true
+            newErrors.password = 'Senha é obrigatória'
         }
 
-        return !isError;
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
     }
 
-    function handleChange(field:string, value:string) {
-        setFormData(prev => ({ ...prev, [field]: value }));
+    function handleChange(field: string, value: string) {
+        setFormData(prev => ({ ...prev, [field]: value }))
+        if (errors[field]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
     }
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event?.preventDefault()
 
-        if (!validate()) return;
+        if (!validate()) return
+
+        setIsLoading(true)
 
         try {
             await context?.handleLogin(formData.email, formData.password)
-
-            if (!context?.authenticated) {
-                console.log("eta padrin")
-            }
+            toast.success("Login realizado com sucesso!")
         } catch (error) {
-            console.log("deu erro")
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status == 403) {
+                    toast.error("Credenciais inválidas!")
+                } else {
+                    toast.error("Ops! Algo deu errado")
+                }
+            }
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -68,10 +87,11 @@ export function Login() {
                                         type="email"
                                         value={formData.email}
                                         onChange={(e) => handleChange('email', e.target.value)}
-                                        className="pl-10"
+                                        className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
                                         placeholder="seu@email.com"
                                     />
                                 </div>
+                                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                             </div>
 
                             <div>
@@ -83,17 +103,19 @@ export function Login() {
                                         type="password"
                                         value={formData.password}
                                         onChange={(e) => handleChange('password', e.target.value)}
-                                        className="pl-10"
+                                        className={`pl-10 ${errors.password ? 'border-red-500' : ''}`}
                                         placeholder="Digite sua senha"
                                     />
                                 </div>
+                                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
                             </div>
 
                             <Button
                                 type="submit"
                                 className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white rounded-full h-12 mt-6"
+                                disabled={isLoading}
                             >
-                                Entrar
+                                {isLoading ? "Entrando..." : "Entrar"}
                             </Button>
                         </form>
 
