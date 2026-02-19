@@ -1,6 +1,7 @@
 import {  createContext, useEffect, useState, type ReactNode } from "react";
 import axios from "axios";
 import { api } from "../services/api";
+import type { LoginData, SignupData } from "@/interfaces/auth";
 
 interface AuthProviderProps {
     children: ReactNode
@@ -9,8 +10,8 @@ interface AuthProviderProps {
 interface AuthContext {
     authenticated: boolean
     loading: boolean
-    handleLogin: (email: string, password: string) => Promise<void>
-    handleSignup: (name: string, email: string, password: string) => Promise<void>
+    handleLogin: ({email, password}: LoginData) => Promise<void>
+    handleSignup: ({name, email, password}: SignupData) => Promise<void>
     handleLogout: () => void
 }
 
@@ -32,7 +33,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         setLoading(false)
     }, [])
 
-    async function handleLogin(email: string, password: string) {
+    async function handleLogin({email, password}: LoginData) {
         const { data } = await axios.post(`${BASE_URL}/auth/login`, {
             email,
             password
@@ -48,7 +49,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         setAuthenticated(true)
     }
 
-    async function handleSignup(name:string, email: string, password: string) {
+    async function handleSignup({name, email, password}: SignupData) {
         await axios.post(`${BASE_URL}/auth/signup`, {
             name,
             email,
