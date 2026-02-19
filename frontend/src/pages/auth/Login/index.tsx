@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
 import { toast } from "sonner"
+import type { LoginData } from "@/interfaces/auth"
 
 export function Login() {
     const context = useContext(Context)
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [isLoading, setIsLoading] = useState(false)
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<LoginData>({
         email: '',
         password: '',
     })
@@ -52,7 +53,7 @@ export function Login() {
         setIsLoading(true)
 
         try {
-            await context?.handleLogin(formData.email, formData.password)
+            await context?.handleLogin(formData)
             toast.success("Login realizado com sucesso!")
         } catch (error) {
             if (axios.isAxiosError(error)) {

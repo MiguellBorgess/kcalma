@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Context } from "@/context/AuthContext";
+import type { SignupData } from "@/interfaces/auth";
 import { Lock, Mail, User } from "lucide-react";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,7 +15,7 @@ export function Signup() {
 
     const navigate = useNavigate()
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<SignupData>({
         name: '',
         email: '',
         password: '',
@@ -72,7 +73,7 @@ export function Signup() {
         setIsLoading(true)
 
         try {
-            await context?.handleSignup(formData.name, formData.email, formData.password)
+            await context?.handleSignup(formData)
             toast.success("Conta criada com sucesso!")
             navigate("/login")
         } catch (error) {
