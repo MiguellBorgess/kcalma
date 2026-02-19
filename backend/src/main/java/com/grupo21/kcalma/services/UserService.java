@@ -2,10 +2,7 @@ package com.grupo21.kcalma.services;
 
 import com.grupo21.kcalma.domain.user.User;
 import com.grupo21.kcalma.domain.user.WeightRecord;
-import com.grupo21.kcalma.dto.ChangePasswordRequestDTO;
-import com.grupo21.kcalma.dto.DeleteWeightRecordDTO;
-import com.grupo21.kcalma.dto.UserDetailsResponseDTO;
-import com.grupo21.kcalma.dto.AddWeightRecordDTO;
+import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.exceptions.ChangePasswordException;
 import com.grupo21.kcalma.exceptions.UserNotFoundException;
 import com.grupo21.kcalma.repositories.UserRepository;
@@ -19,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +55,7 @@ public class UserService {
     public UserDetailsResponseDTO getUserDetails(Principal connectedUser) {
         User user = getAuthenticatedUser(connectedUser);
 
-        return new UserDetailsResponseDTO(user.getName(), user.getEmail());
+        return new UserDetailsResponseDTO(user.getName(), user.getEmail(), user.getAltura());
     }
 
     public User getAuthenticatedUser(Principal connectedUser) {
@@ -65,15 +63,33 @@ public class UserService {
     }
 
     @Transactional
-    public WeightRecord addWeightRecord(AddWeightRecordDTO data, Principal connectedUser){
+    public UserDetailsResponseDTO updateUser(UpdateUserDTO data, Principal connectedUser) {
+        User user = getAuthenticatedUser(connectedUser);
+
+        if(data.getName()!=null) user.setName(data.getName());
+        if(data.getEmail()!=null) user.setEmail(data.getEmail());
+
+        if(data.getAltura()!=0){
+            if (data.getAltura() < 50 || data.getAltura() > 300)
+                throw new IllegalArgumentException("Altura deve ser entre 50cm e 300cm");
+            user.setAltura(data.getAltura());
+        }
+
+        repository.save(user);
+        return new UserDetailsResponseDTO(user.getName(), user.getEmail(), user.getAltura());
+    }
+
+    @Transactional
+    public WeightRecordDTO addWeightRecord(AddWeightRecordDTO data, Principal connectedUser){
         User user = getAuthenticatedUser(connectedUser);
 
         WeightRecord record = new WeightRecord();
         record.setPesoKg(data.pesoKg());
         record.setUser(user);
 
-        return weightRepository.save(record);
+        WeightRecord newRecord = weightRepository.save(record);
 
+        return new WeightRecordDTO(newRecord.getId(), newRecord.getPesoKg(), newRecord.getCreatedAt());
     }
 
     @Transactional
@@ -102,9 +118,17 @@ public class UserService {
         }
     }
 
-    public List<WeightRecord> getWeightRecords(Principal connectedUser) {
+    public List<WeightRecordDTO> getWeightRecords(Principal connectedUser) {
         User user = getAuthenticatedUser(connectedUser);
 
-        return weightRepository.getAllByUser(user);
+        List<WeightRecord> records = weightRepository.getAllByUser(user);
+
+        return records.stream()
+                .map(record -> new WeightRecordDTO(
+                        record.getId(),
+                        record.getPesoKg(),
+                        record.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
     }
 }

@@ -1,10 +1,7 @@
 package com.grupo21.kcalma.controllers;
 
 import com.grupo21.kcalma.domain.user.WeightRecord;
-import com.grupo21.kcalma.dto.ChangePasswordRequestDTO;
-import com.grupo21.kcalma.dto.DeleteWeightRecordDTO;
-import com.grupo21.kcalma.dto.UserDetailsResponseDTO;
-import com.grupo21.kcalma.dto.AddWeightRecordDTO;
+import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +30,22 @@ public class UserController {
         return ResponseEntity.ok(userDetailsResponseDTO);
     }
 
-    @PostMapping("/add-weight")
-        public ResponseEntity<WeightRecord> addWeight(@RequestBody AddWeightRecordDTO data, Principal connectedUser) {
+    @PatchMapping("/update")
+    public ResponseEntity<UserDetailsResponseDTO> updateUser(@RequestBody UpdateUserDTO data, Principal connectedUser){
 
-        WeightRecord record = userService.addWeightRecord(data, connectedUser);
+        try {
+            UserDetailsResponseDTO response = userService.updateUser(data, connectedUser);
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/add-weight")
+        public ResponseEntity<WeightRecordDTO> addWeight(@RequestBody AddWeightRecordDTO data, Principal connectedUser) {
+
+        WeightRecordDTO record = userService.addWeightRecord(data, connectedUser);
 
         return ResponseEntity.ok(record);
     }
@@ -50,9 +59,9 @@ public class UserController {
     }
 
     @GetMapping("/weight-records")
-    public ResponseEntity<List<WeightRecord>> getWeightRecords(Principal connectedUser){
+    public ResponseEntity<List<WeightRecordDTO>> getWeightRecords(Principal connectedUser){
 
-        List<WeightRecord> records = userService.getWeightRecords(connectedUser);
+        List<WeightRecordDTO> records = userService.getWeightRecords(connectedUser);
 
         return  ResponseEntity.ok(records);
     }

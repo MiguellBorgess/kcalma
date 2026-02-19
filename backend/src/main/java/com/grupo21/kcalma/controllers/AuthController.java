@@ -12,7 +12,7 @@ import com.grupo21.kcalma.services.AuthenticationService;
 import com.grupo21.kcalma.services.PasswordResetTokenService;
 import com.grupo21.kcalma.services.RefreshTokenService;
 import com.grupo21.kcalma.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,17 +20,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
-    @Autowired
-    private JwtService jwtService;
-    @Autowired
-    private AuthenticationService authenticationService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private RefreshTokenService refreshTokenService;
-    @Autowired
-    private PasswordResetTokenService passwordResetTokenService;
+    private final JwtService jwtService;
+    private final AuthenticationService authenticationService;
+    private final UserService userService;
+    private final RefreshTokenService refreshTokenService;
+    private final PasswordResetTokenService passwordResetTokenService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> register(@RequestBody RegisterRequestDTO registerUserDto) {
