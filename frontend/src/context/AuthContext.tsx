@@ -10,6 +10,7 @@ interface AuthContext {
     authenticated: boolean
     loading: boolean
     handleLogin: (email: string, password: string) => Promise<void>
+    handleSignup: (name: string, email: string, password: string) => Promise<void>
     handleLogout: () => void
 }
 
@@ -47,6 +48,15 @@ function AuthProvider({ children }: AuthProviderProps) {
         setAuthenticated(true)
     }
 
+    async function handleSignup(name:string, email: string, password: string) {
+        await axios.post(`${BASE_URL}/auth/signup`, {
+            name,
+            email,
+            password,
+            role: "USER"
+        })
+    }
+
     function handleLogout() {
         setAuthenticated(false)
 
@@ -59,7 +69,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return (
-        <Context.Provider value={{authenticated, loading, handleLogin, handleLogout}}>
+        <Context.Provider value={{authenticated, loading, handleLogin, handleSignup, handleLogout}}>
             {children}
         </Context.Provider>
     )
