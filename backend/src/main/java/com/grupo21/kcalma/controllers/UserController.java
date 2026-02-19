@@ -43,9 +43,9 @@ public class UserController {
     }
 
     @PostMapping("/add-weight")
-        public ResponseEntity<WeightRecord> addWeight(@RequestBody AddWeightRecordDTO data, Principal connectedUser) {
+        public ResponseEntity<WeightRecordDTO> addWeight(@RequestBody AddWeightRecordDTO data, Principal connectedUser) {
 
-        WeightRecord record = userService.addWeightRecord(data, connectedUser);
+        WeightRecordDTO record = userService.addWeightRecord(data, connectedUser);
 
         return ResponseEntity.ok(record);
     }
@@ -59,9 +59,9 @@ public class UserController {
     }
 
     @GetMapping("/weight-records")
-    public ResponseEntity<List<WeightRecord>> getWeightRecords(Principal connectedUser){
+    public ResponseEntity<List<WeightRecordDTO>> getWeightRecords(Principal connectedUser){
 
-        List<WeightRecord> records = userService.getWeightRecords(connectedUser);
+        List<WeightRecordDTO> records = userService.getWeightRecords(connectedUser);
 
         return  ResponseEntity.ok(records);
     }

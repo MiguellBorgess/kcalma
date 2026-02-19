@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,15 +80,16 @@ public class UserService {
     }
 
     @Transactional
-    public WeightRecord addWeightRecord(AddWeightRecordDTO data, Principal connectedUser){
+    public WeightRecordDTO addWeightRecord(AddWeightRecordDTO data, Principal connectedUser){
         User user = getAuthenticatedUser(connectedUser);
 
         WeightRecord record = new WeightRecord();
         record.setPesoKg(data.pesoKg());
         record.setUser(user);
 
-        return weightRepository.save(record);
+        WeightRecord newRecord = weightRepository.save(record);
 
+        return new WeightRecordDTO(newRecord.getId(), newRecord.getPesoKg(), newRecord.getCreatedAt());
     }
 
     @Transactional
@@ -116,9 +118,17 @@ public class UserService {
         }
     }
 
-    public List<WeightRecord> getWeightRecords(Principal connectedUser) {
+    public List<WeightRecordDTO> getWeightRecords(Principal connectedUser) {
         User user = getAuthenticatedUser(connectedUser);
 
-        return weightRepository.getAllByUser(user);
+        List<WeightRecord> records = weightRepository.getAllByUser(user);
+
+        return records.stream()
+                .map(record -> new WeightRecordDTO(
+                        record.getId(),
+                        record.getPesoKg(),
+                        record.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
     }
 }
