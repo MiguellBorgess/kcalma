@@ -2,10 +2,7 @@ package com.grupo21.kcalma.services;
 
 import com.grupo21.kcalma.domain.user.User;
 import com.grupo21.kcalma.domain.user.WeightRecord;
-import com.grupo21.kcalma.dto.ChangePasswordRequestDTO;
-import com.grupo21.kcalma.dto.DeleteWeightRecordDTO;
-import com.grupo21.kcalma.dto.UserDetailsResponseDTO;
-import com.grupo21.kcalma.dto.AddWeightRecordDTO;
+import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.exceptions.ChangePasswordException;
 import com.grupo21.kcalma.exceptions.UserNotFoundException;
 import com.grupo21.kcalma.repositories.UserRepository;
@@ -57,11 +54,28 @@ public class UserService {
     public UserDetailsResponseDTO getUserDetails(Principal connectedUser) {
         User user = getAuthenticatedUser(connectedUser);
 
-        return new UserDetailsResponseDTO(user.getName(), user.getEmail());
+        return new UserDetailsResponseDTO(user.getName(), user.getEmail(), user.getAltura());
     }
 
     public User getAuthenticatedUser(Principal connectedUser) {
         return (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    }
+
+    @Transactional
+    public UserDetailsResponseDTO updateUser(UpdateUserDTO data, Principal connectedUser) {
+        User user = getAuthenticatedUser(connectedUser);
+
+        if(data.getName()!=null) user.setName(data.getName());
+        if(data.getEmail()!=null) user.setEmail(data.getEmail());
+
+        if(data.getAltura()!=0){
+            if (data.getAltura() < 50 || data.getAltura() > 300)
+                throw new IllegalArgumentException("Altura deve ser entre 50cm e 300cm");
+            user.setAltura(data.getAltura());
+        }
+
+        repository.save(user);
+        return new UserDetailsResponseDTO(user.getName(), user.getEmail(), user.getAltura());
     }
 
     @Transactional

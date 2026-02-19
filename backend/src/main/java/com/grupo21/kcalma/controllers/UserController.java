@@ -1,10 +1,7 @@
 package com.grupo21.kcalma.controllers;
 
 import com.grupo21.kcalma.domain.user.WeightRecord;
-import com.grupo21.kcalma.dto.ChangePasswordRequestDTO;
-import com.grupo21.kcalma.dto.DeleteWeightRecordDTO;
-import com.grupo21.kcalma.dto.UserDetailsResponseDTO;
-import com.grupo21.kcalma.dto.AddWeightRecordDTO;
+import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +28,18 @@ public class UserController {
         UserDetailsResponseDTO userDetailsResponseDTO = userService.getUserDetails(connectedUser);
 
         return ResponseEntity.ok(userDetailsResponseDTO);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<UserDetailsResponseDTO> updateUser(@RequestBody UpdateUserDTO data, Principal connectedUser){
+
+        try {
+            UserDetailsResponseDTO response = userService.updateUser(data, connectedUser);
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/add-weight")

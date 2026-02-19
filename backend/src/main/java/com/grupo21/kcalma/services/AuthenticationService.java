@@ -26,7 +26,7 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User signup(RegisterRequestDTO input) {
+    public void signup(RegisterRequestDTO input) {
         User newUser = new User();
 
         newUser.setPassword(passwordEncoder.encode(input.password()));
@@ -34,7 +34,12 @@ public class AuthenticationService {
         newUser.setName(input.name());
         newUser.setRole(input.role());
 
-        return userRepository.save(newUser);
+        if (input.altura() < 50 || input.altura() > 300)
+            throw new IllegalArgumentException("Altura deve ser entre 50cm e 300cm");
+
+        newUser.setAltura(input.altura());
+
+        userRepository.save(newUser);
     }
 
     public User authenticate(LoginRequestDTO input) {
