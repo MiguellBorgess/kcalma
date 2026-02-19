@@ -2,12 +2,15 @@ import { createBrowserRouter, createRoutesFromElements, Route } from "react-rout
 import { PrivateRoute } from "./PrivateRoute";
 import { Login } from "../pages/auth/Login";
 import { Signup } from "@/pages/auth/Signup";
+import { AppLayout } from "@/pages/app/AppLayout";
 
 export const routes = createBrowserRouter(
     createRoutesFromElements(
         <>
             <Route path="/" element={<PrivateRoute />}>
                 {/* rotas protegidas por login */}
+                <Route path="/" element={<AppLayout />}>
+                </Route>
             </Route>
 
             {/* rotas desprotegidas */}
