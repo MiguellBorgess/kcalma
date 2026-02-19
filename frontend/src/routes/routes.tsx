@@ -4,6 +4,8 @@ import { Login } from "../pages/auth/Login";
 import { Signup } from "@/pages/auth/Signup";
 import { AppLayout } from "@/pages/app/AppLayout";
 import { Home } from "@/pages/app/Home";
+import { CalendarPage } from "@/pages/app/CalendarPage";
+import { ProfilePage } from "@/pages/app/ProfilePage";
 
 export const routes = createBrowserRouter(
     createRoutesFromElements(
@@ -12,6 +14,8 @@ export const routes = createBrowserRouter(
                 {/* rotas protegidas por login */}
                 <Route path="/" element={<AppLayout />}>
                     <Route index element={<Home />}/>
+                    <Route path="/calendar" element={<CalendarPage />}/>
+                    <Route path="/profile" element={<ProfilePage />}/>
                 </Route>
             </Route>
 
