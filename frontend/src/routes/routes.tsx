@@ -1,6 +1,7 @@
 import { createBrowserRouter, createRoutesFromElements, Route } from "react-router-dom";
 import { PrivateRoute } from "./PrivateRoute";
 import { Login } from "../pages/auth/Login";
+import { Signup } from "@/pages/auth/Signup";
 
 export const routes = createBrowserRouter(
     createRoutesFromElements(
@@ -11,6 +12,7 @@ export const routes = createBrowserRouter(
 
             {/* rotas desprotegidas */}
             <Route path="/login" element={<Login />}/>
+            <Route path="/signup" element={<Signup />}/>
         </>
     )
 )
