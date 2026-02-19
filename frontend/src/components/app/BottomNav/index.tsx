@@ -7,7 +7,7 @@ export function BottomNav() {
             <div className="max-w-7xl mx-auto px-4">
                 <div className="grid grid-cols-3 gap-1">
                     <NavLink
-                        to="/app"
+                        to="/"
                         end
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center py-3 px-2 transition-colors ${isActive
@@ -16,16 +16,12 @@ export function BottomNav() {
                             }`
                         }
                     >
-                        {({ isActive }) => (
-                            <>
-                                <Apple size={24} strokeWidth={isActive ? 2.5 : 2} />
-                                <span className="text-xs mt-1">Calorias</span>
-                            </>
-                        )}
+                        <Apple size={24} strokeWidth={2} />
+                        <span className="text-xs mt-1">Calorias</span>
                     </NavLink>
 
                     <NavLink
-                        to="/app/calendar"
+                        to="/calendar"
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center py-3 px-2 transition-colors ${isActive
                                 ? 'text-[#4CAF50]'
@@ -33,16 +29,12 @@ export function BottomNav() {
                             }`
                         }
                     >
-                        {({ isActive }) => (
-                            <>
-                                <Calendar size={24} strokeWidth={isActive ? 2.5 : 2} />
-                                <span className="text-xs mt-1">Calendário</span>
-                            </>
-                        )}
+                        <Calendar size={24} strokeWidth={2} />
+                        <span className="text-xs mt-1">Calendário</span>
                     </NavLink>
 
                     <NavLink
-                        to="/app/profile"
+                        to="/profile"
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center py-3 px-2 transition-colors ${isActive
                                 ? 'text-[#4CAF50]'
@@ -50,12 +42,8 @@ export function BottomNav() {
                             }`
                         }
                     >
-                        {({ isActive }) => (
-                            <>
-                                <User size={24} strokeWidth={isActive ? 2.5 : 2} />
-                                <span className="text-xs mt-1">Perfil</span>
-                            </>
-                        )}
+                        <User size={24} strokeWidth={2} />
+                        <span className="text-xs mt-1">Perfil</span>
                     </NavLink>
                 </div>
             </div>
