@@ -6,6 +6,7 @@ import { AppLayout } from "@/pages/app/AppLayout";
 import { Home } from "@/pages/app/Home";
 import { CalendarPage } from "@/pages/app/CalendarPage";
 import { ProfilePage } from "@/pages/app/ProfilePage";
+import WeightHistory from "@/pages/app/WeightHistory";
 
 export const routes = createBrowserRouter(
     createRoutesFromElements(
@@ -14,6 +15,7 @@ export const routes = createBrowserRouter(
                 {/* rotas protegidas por login */}
                 <Route path="/" element={<AppLayout />}>
                     <Route index element={<Home />}/>
+                    <Route path="/weight" element={<WeightHistory />}/>
                     <Route path="/calendar" element={<CalendarPage />}/>
                     <Route path="/profile" element={<ProfilePage />}/>
                 </Route>
