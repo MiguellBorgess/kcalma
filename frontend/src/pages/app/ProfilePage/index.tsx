@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useUserDetailsData } from "@/hooks/useUserDetails";
+import { Context } from "@/context/AuthContext";
 import { Mail, User } from "lucide-react";
+import { useContext } from "react";
 
 export function ProfilePage() {
-    const user = useUserDetailsData().data
+    const user = useContext(Context)?.user
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-8">
