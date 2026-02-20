@@ -2,6 +2,8 @@ import {  createContext, useEffect, useState, type ReactNode } from "react";
 import axios from "axios";
 import { api } from "../services/api";
 import type { LoginData, SignupData } from "@/interfaces/auth";
+import type { UserDetailsData } from "@/interfaces/userDetails";
+import { useUserDetailsData } from "@/hooks/useUserDetails";
 
 interface AuthProviderProps {
     children: ReactNode
@@ -10,6 +12,7 @@ interface AuthProviderProps {
 interface AuthContext {
     authenticated: boolean
     loading: boolean
+    user: UserDetailsData | undefined
     handleLogin: ({email, password}: LoginData) => Promise<void>
     handleSignup: ({name, email, password}: SignupData) => Promise<void>
     handleLogout: () => void
@@ -18,9 +21,18 @@ interface AuthContext {
 const Context = createContext<AuthContext | undefined>(undefined)
 
 function AuthProvider({ children }: AuthProviderProps) {
+    const [user, setUser] = useState<UserDetailsData | undefined>(undefined)
     const BASE_URL = import.meta.env.VITE_API_URL
     const [authenticated, setAuthenticated] = useState(false)
     const [loading, setLoading] = useState(true)
+
+    const { data } = useUserDetailsData()
+
+    useEffect(() => {
+        if (data) {
+            setUser(data)
+        }
+    }, [data])
 
     useEffect(() => {
         const token = localStorage.getItem("@Auth:token")
@@ -49,12 +61,13 @@ function AuthProvider({ children }: AuthProviderProps) {
         setAuthenticated(true)
     }
 
-    async function handleSignup({name, email, password}: SignupData) {
+    async function handleSignup({name, email, password, altura}: SignupData) {
         await axios.post(`${BASE_URL}/auth/signup`, {
             name,
             email,
             password,
-            role: "USER"
+            role: "USER",
+            altura: parseInt(altura)
         })
     }
 
@@ -70,7 +83,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return (
-        <Context.Provider value={{authenticated, loading, handleLogin, handleSignup, handleLogout}}>
+        <Context.Provider value={{authenticated, loading, user, handleLogin, handleSignup, handleLogout}}>
             {children}
         </Context.Provider>
     )

@@ -1,6 +1,6 @@
-import type { UserDetailsData } from "@/interfaces/userDetails";
+import type { UpdateWeightData, UserDetailsData } from "@/interfaces/userDetails";
 import { api } from "@/services/api";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 
 const fetchData = async () => {
@@ -15,4 +15,22 @@ export function useUserDetailsData() {
     })
 
     return query
+}
+
+const updateWeight = async ({ altura }: UpdateWeightData) => {
+    return await api.patch("/user/update", {
+        altura
+    })
+}
+
+export function useUpdateWeight() {
+    const queryClient = useQueryClient()
+    const mutate = useMutation({
+        mutationFn: updateWeight,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['user-details-data'] })
+        }
+    })
+
+    return mutate
 }
