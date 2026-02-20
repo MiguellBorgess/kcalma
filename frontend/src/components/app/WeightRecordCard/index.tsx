@@ -14,6 +14,7 @@ interface WeightRecordCardProps {
     isExpanded: boolean
     bmi: number | null
     createdAt: string
+    altura: number
     trend: WeightTrendData | null
     toggleExpand: (id: number) => void
     handleDeleteWeight: (id: number) => void
@@ -31,7 +32,7 @@ const formatDate = (dateString: string) => {
     return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-export function WeightRecordCard({ id, pesoKg, toggleExpand, trend, isExpanded, bmi, createdAt, handleDeleteWeight }: WeightRecordCardProps) {
+export function WeightRecordCard({ id, pesoKg, toggleExpand, trend, isExpanded, bmi, createdAt, handleDeleteWeight, altura }: WeightRecordCardProps) {
     return (
         <Card key={id} className="overflow-hidden transition-all py-0">
             <CardContent className="p-0">
@@ -76,7 +77,7 @@ export function WeightRecordCard({ id, pesoKg, toggleExpand, trend, isExpanded, 
                                         </span>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-3">
-                                        Baseado na altura de {182} cm
+                                        Baseado na altura de {altura} cm
                                     </p>
                                 </div>
                             </div>

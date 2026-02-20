@@ -1,5 +1,5 @@
 export interface WeightRecordData {
-    id: number
+    weightId: number
     pesoKg: number
     createdAt: string
 }

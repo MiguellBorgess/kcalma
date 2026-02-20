@@ -4,12 +4,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Context } from "@/context/AuthContext";
 import { useAddWeight, useDeleteWeight, useWeightRecordsData } from "@/hooks/useWeightRecord";
 import { Minus, Plus, Scale, TrendingDown, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { toast } from "sonner";
 
 export default function WeightHistory() {
+    const user = useContext(Context)?.user
+
     const weightEntries = useWeightRecordsData().data || []
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [weight, setWeight] = useState('')
@@ -20,7 +23,8 @@ export default function WeightHistory() {
     const deleteWeightMutation = useDeleteWeight()
 
     const calculateBMI = (weight: number): number | null => {
-        return Number((weight / (1.82 * 1.82)).toFixed(1))
+        const alturaEmMetros = parseInt(user?.altura || '0') / 100
+        return Number((weight / (alturaEmMetros * alturaEmMetros)).toFixed(1))
     }
 
     async function handleAddWeight() {
@@ -151,16 +155,17 @@ export default function WeightHistory() {
                     ).map((entry, index) => {
                         const bmi = calculateBMI(entry.pesoKg)
                         const trend = getWeightTrend(entry.pesoKg, index)
-                        const isExpanded = expandedId === entry.id
+                        const isExpanded = expandedId === entry.weightId
 
                         return (
                             <WeightRecordCard
-                                id={entry.id}
+                                id={entry.weightId}
                                 bmi={bmi}
                                 createdAt={entry.createdAt}
                                 pesoKg={entry.pesoKg}
                                 isExpanded={isExpanded}
                                 trend={trend}
+                                altura={parseInt(user?.altura || "")}
                                 handleDeleteWeight={handleDeleteWeight}
                                 toggleExpand={toggleExpand}
                             />
