@@ -2,8 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Context } from "@/context/AuthContext";
-import type { SignupData } from "@/interfaces/auth";
-import { Lock, Mail, User } from "lucide-react";
+import { Lock, Mail, Ruler, User } from "lucide-react";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -15,11 +14,12 @@ export function Signup() {
 
     const navigate = useNavigate()
 
-    const [formData, setFormData] = useState<SignupData>({
+    const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        altura: ''
     })
 
     const validateEmail = (email: string) => {
@@ -48,6 +48,12 @@ export function Signup() {
             newErrors.confirmPassword = 'Confirme sua senha';
         } else if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'As senhas não coincidem';
+        }
+
+        if (!formData.altura) {
+            newErrors.altura = 'Altura é obrigatória';
+        } else if (Number(formData.altura) <= 0) {
+            newErrors.altura = 'Altura deve ser maior que zero';
         }
 
         setErrors(newErrors)
@@ -155,6 +161,22 @@ export function Signup() {
                                 />
                             </div>
                             {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+                        </div>
+
+                        <div>
+                            <Label htmlFor="altura">Altura (cm)</Label>
+                            <div className="relative mt-1">
+                                <Ruler className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                                <Input
+                                    id="altura"
+                                    type="number"
+                                    value={formData.altura}
+                                    onChange={(e) => handleChange('altura', e.target.value)}
+                                    className={`pl-10 ${errors.altura ? 'border-red-500' : ''}`}
+                                    placeholder="Ex: 170"
+                                />
+                            </div>
+                            {errors.altura && <p className="text-red-500 text-sm mt-1">{errors.altura}</p>}
                         </div>
 
                         <Button

@@ -49,12 +49,13 @@ function AuthProvider({ children }: AuthProviderProps) {
         setAuthenticated(true)
     }
 
-    async function handleSignup({name, email, password}: SignupData) {
+    async function handleSignup({name, email, password, altura}: SignupData) {
         await axios.post(`${BASE_URL}/auth/signup`, {
             name,
             email,
             password,
-            role: "USER"
+            role: "USER",
+            altura: parseInt(altura)
         })
     }
 
