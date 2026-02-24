@@ -1,7 +1,7 @@
 package com.grupo21.kcalma.services;
 
 import com.grupo21.kcalma.domain.user.User;
-import com.grupo21.kcalma.domain.user.WeightRecord;
+import com.grupo21.kcalma.domain.weightRecord.WeightRecord;
 import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.exceptions.ChangePasswordException;
 import com.grupo21.kcalma.exceptions.UserNotFoundException;

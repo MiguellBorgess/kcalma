@@ -1,6 +1,5 @@
 package com.grupo21.kcalma.controllers;
 
-import com.grupo21.kcalma.domain.user.WeightRecord;
 import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.services.UserService;
 import lombok.RequiredArgsConstructor;
