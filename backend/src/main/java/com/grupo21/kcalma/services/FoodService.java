@@ -25,6 +25,7 @@ public class FoodService {
         Food food = new Food();
 
         food.setName(dados.name());
+        food.setMeasureUnit(dados.measureUnit());
         food.setUser(user);
         food.setCalories(dados.calories());
 

@@ -26,13 +26,16 @@ public class Food {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User user; //Analisar se vai manter
+
+    @Column(name = "measure_unit")
+    private MeasureUnit measureUnit;
 
     @Column(nullable = false)
     private int calories;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt; //Se não precisar, retirar depois
 
     @PrePersist
     protected void onCreate(){

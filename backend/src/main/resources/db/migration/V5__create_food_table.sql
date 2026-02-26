@@ -2,6 +2,7 @@ CREATE TABLE foods (
     food_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     user_id char(36) NOT NULL,
+    measure_unit int NOT NULL,
     calories INT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
