@@ -1,5 +1,6 @@
-package com.grupo21.kcalma.domain.user;
+package com.grupo21.kcalma.domain.weightRecord;
 
+import com.grupo21.kcalma.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

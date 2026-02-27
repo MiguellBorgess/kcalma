@@ -1,7 +1,7 @@
 package com.grupo21.kcalma.services;
 
 import com.grupo21.kcalma.domain.user.User;
-import com.grupo21.kcalma.domain.user.WeightRecord;
+import com.grupo21.kcalma.domain.weightRecord.WeightRecord;
 import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.exceptions.ChangePasswordException;
 import com.grupo21.kcalma.exceptions.UserNotFoundException;
@@ -63,7 +63,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDetailsResponseDTO updateUser(UpdateUserDTO data, Principal connectedUser) {
+    public UserDetailsResponseDTO updateUser(UpdateUserRequestDTO data, Principal connectedUser) {
         User user = getAuthenticatedUser(connectedUser);
 
         if(data.getName()!=null) user.setName(data.getName());
@@ -80,7 +80,7 @@ public class UserService {
     }
 
     @Transactional
-    public WeightRecordDTO addWeightRecord(AddWeightRecordDTO data, Principal connectedUser){
+    public WeightRecordResponseDTO addWeightRecord(AddWeightRecordRequestDTO data, Principal connectedUser){
         User user = getAuthenticatedUser(connectedUser);
 
         WeightRecord record = new WeightRecord();
@@ -89,11 +89,11 @@ public class UserService {
 
         WeightRecord newRecord = weightRepository.save(record);
 
-        return new WeightRecordDTO(newRecord.getId(), newRecord.getPesoKg(), newRecord.getCreatedAt());
+        return new WeightRecordResponseDTO(newRecord.getId(), newRecord.getPesoKg(), newRecord.getCreatedAt());
     }
 
     @Transactional
-    public void DeleteWeightRecord(DeleteWeightRecordDTO data, Principal connectedUser) {
+    public void DeleteWeightRecord(DeleteWeightRecordRequestDTO data, Principal connectedUser) {
         User user = getAuthenticatedUser(connectedUser);
 
         Optional<WeightRecord> OpRecord = weightRepository.findById(data.id());
@@ -118,13 +118,13 @@ public class UserService {
         }
     }
 
-    public List<WeightRecordDTO> getWeightRecords(Principal connectedUser) {
+    public List<WeightRecordResponseDTO> getWeightRecords(Principal connectedUser) {
         User user = getAuthenticatedUser(connectedUser);
 
         List<WeightRecord> records = weightRepository.getAllByUser(user);
 
         return records.stream()
-                .map(record -> new WeightRecordDTO(
+                .map(record -> new WeightRecordResponseDTO(
                         record.getId(),
                         record.getPesoKg(),
                         record.getCreatedAt()
