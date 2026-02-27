@@ -38,7 +38,7 @@ mvn -version
 
 ## ⚙️ Configuração das Variáveis de Ambiente
 
-O projeto **não utiliza arquivo `.env`**.  
+O projeto **não utiliza arquivo `.env`**, a não ser que esteja sendo utilizado o docker.  
 As configurações são feitas via **variáveis de ambiente do sistema operacional**.
 
 ---
@@ -88,6 +88,24 @@ source ~/.bashrc
 ```
 
 ---
+
+### Docker
+
+Para instalar o docker, siga o tutorial da página oficial do [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+Crie uma cópia do arquivo ```.env.example```, chamada ```.env```, e preencha os dados vazios do arquivo.
+
+Para rodar a aplicação, basta o comando:
+
+```bash
+docker compose up
+```
+
+Ou também, você pode usar:
+```bash
+docker compose watch
+```
+Em ambiente de desenvolvimento, é recomendável usar o watch, pois ele mapeia todas as mudanças na pasta ```src``` para o container e faz rebuild do projeto automaticamente.
 
 ## 🗄️ Configuração do Banco de Dados
 
