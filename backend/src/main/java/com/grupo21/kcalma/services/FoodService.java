@@ -19,7 +19,7 @@ public class FoodService {
     private final UserService userService;
     private final FoodRepository foodRepository;
 
-    public FoodResponseDTO addFood(AddFoodDTO dados, Principal connectedUser) {
+    public FoodResponseDTO addFood(AddFoodRequestDTO dados, Principal connectedUser) {
         User user = userService.getAuthenticatedUser(connectedUser);
         Food food = new Food();
 

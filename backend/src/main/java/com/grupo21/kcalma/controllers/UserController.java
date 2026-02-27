@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<UserDetailsResponseDTO> updateUser(@RequestBody UpdateUserDTO data, Principal connectedUser){
+    public ResponseEntity<UserDetailsResponseDTO> updateUser(@RequestBody UpdateUserRequestDTO data, Principal connectedUser){
 
         try {
             UserDetailsResponseDTO response = userService.updateUser(data, connectedUser);
@@ -42,15 +42,15 @@ public class UserController {
     }
 
     @PostMapping("/add-weight")
-        public ResponseEntity<WeightRecordDTO> addWeight(@RequestBody AddWeightRecordDTO data, Principal connectedUser) {
+        public ResponseEntity<WeightRecordResponseDTO> addWeight(@RequestBody AddWeightRecordRequestDTO data, Principal connectedUser) {
 
-        WeightRecordDTO record = userService.addWeightRecord(data, connectedUser);
+        WeightRecordResponseDTO record = userService.addWeightRecord(data, connectedUser);
 
         return ResponseEntity.ok(record);
     }
 
     @DeleteMapping("/del-weight")
-    public ResponseEntity<Void> deleteWeight(@RequestBody DeleteWeightRecordDTO data, Principal connectedUser) {
+    public ResponseEntity<Void> deleteWeight(@RequestBody DeleteWeightRecordRequestDTO data, Principal connectedUser) {
 
         userService.DeleteWeightRecord(data, connectedUser);
 
@@ -58,9 +58,9 @@ public class UserController {
     }
 
     @GetMapping("/weight-records")
-    public ResponseEntity<List<WeightRecordDTO>> getWeightRecords(Principal connectedUser){
+    public ResponseEntity<List<WeightRecordResponseDTO>> getWeightRecords(Principal connectedUser){
 
-        List<WeightRecordDTO> records = userService.getWeightRecords(connectedUser);
+        List<WeightRecordResponseDTO> records = userService.getWeightRecords(connectedUser);
 
         return  ResponseEntity.ok(records);
     }
