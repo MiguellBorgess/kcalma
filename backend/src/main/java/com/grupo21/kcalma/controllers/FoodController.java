@@ -1,8 +1,6 @@
 package com.grupo21.kcalma.controllers;
 
-import com.grupo21.kcalma.dto.AddFoodDTO;
-import com.grupo21.kcalma.dto.FoodByNameRequestDTO;
-import com.grupo21.kcalma.dto.FoodResponseDTO;
+import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.services.FoodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +35,16 @@ public class FoodController {
 
         return ResponseEntity.ok(response);
     }
-    
+
+    @DeleteMapping("/delete")
+    public void deleteById(@RequestBody DeleteFoodRequestDTO data, Principal connectedUser){
+        foodService.deleteById(data, connectedUser);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<FoodResponseDTO> updateFood(@RequestBody UpdateFoodRequestDTO data, Principal connectedUser){
+        FoodResponseDTO response = foodService.updateFood(data, connectedUser);
+
+        return ResponseEntity.ok(response);
+    }
 }
