@@ -1,14 +1,17 @@
 package com.grupo21.kcalma.services;
 
 import com.grupo21.kcalma.domain.Meal.Meal;
+import com.grupo21.kcalma.domain.Meal.MealFoodId;
+import com.grupo21.kcalma.domain.Meal.MealFoods;
+import com.grupo21.kcalma.domain.food.Food;
 import com.grupo21.kcalma.domain.user.User;
-import com.grupo21.kcalma.dto.AddMealRequestDTO;
-import com.grupo21.kcalma.dto.MealByIdRequestDTO;
-import com.grupo21.kcalma.dto.MealResponseDTO;
-import com.grupo21.kcalma.dto.UpdateMealRequestDTO;
+import com.grupo21.kcalma.dto.*;
+import com.grupo21.kcalma.repositories.FoodRepository;
 import com.grupo21.kcalma.repositories.MealRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.security.Principal;
 import java.util.List;
@@ -21,17 +24,31 @@ public class MealService {
 
     private final UserService userService;
     private final MealRepository mealRepository;
+    private final FoodRepository foodRepository;
 
-    public MealResponseDTO addMeal(AddMealRequestDTO data, Principal connectedUser) {
+    @Transactional
+    public MealResponseDTO addMeal(@RequestBody AddMealRequestDTO data, Principal connectedUser) {
         User user = userService.getAuthenticatedUser(connectedUser);
 
-        Meal meal = new Meal();
+        Meal newMeal = new Meal();
 
-        meal.setUser(user);
-        meal.setName(data.name());
-        meal.setMealType(data.mealType());
-        meal.setDescription(data.description());
+        newMeal.setUser(user);
+        newMeal.setName(data.name());
+        newMeal.setMealType(data.mealType());
+        newMeal.setDescription(data.description());
 
+        Meal meal = mealRepository.save(newMeal);
+
+
+        for (MealFoodItemRequestDTO item : data.mealFoods()) {
+            Food food = foodRepository.findById(item.foodId()).orElseThrow(() -> new RuntimeException("Food não encontrado: " + item.foodId()));
+
+            MealFoodId mealFoodId = new MealFoodId(meal.getId(), food.getId());
+
+            MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount());
+
+            meal.getMealFoods().add(mealFoods);
+        }
         return MealResponseDTO.create(mealRepository.save(meal));
     }
 
