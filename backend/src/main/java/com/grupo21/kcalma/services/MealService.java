@@ -75,7 +75,7 @@ public class MealService {
         return null; //temporário
     }
 
-    public void deleteById(MealByIdRequestDTO data, Principal connectedUser) {
+    public void deleteMealById(MealByIdRequestDTO data, Principal connectedUser) {
         User user = userService.getAuthenticatedUser(connectedUser);
 
         Optional<Meal> opMeal = mealRepository.findById(data.id());
@@ -140,5 +140,28 @@ public class MealService {
             }
         }
         return null; //temporário
+    }
+
+    public void deleteMealFoodById(DeleteMealFoodsRequestDTO data, Principal connectedUser) {
+        User user = userService.getAuthenticatedUser(connectedUser);
+
+        Optional<Meal> opMeal = mealRepository.findById(data.mealId());
+
+        if(opMeal.isPresent()){
+            Meal meal = opMeal.get();
+
+            if(meal.getUser().equals(user)){
+
+                for(Long item:data.foodsId()){
+
+                    Optional<MealFoods> opMealFoods = meal.getMealFoods().stream()
+                            .filter(mealFoods -> mealFoods.getFood().getId().equals(item))
+                            .findFirst();
+
+                    opMealFoods.ifPresent(mealFoods -> meal.getMealFoods().remove(mealFoods));
+                }
+                mealRepository.save(meal);
+            }
+        }
     }
 }

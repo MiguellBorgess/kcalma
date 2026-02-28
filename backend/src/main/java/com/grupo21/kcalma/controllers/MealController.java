@@ -38,7 +38,7 @@ public class MealController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteById(@RequestBody MealByIdRequestDTO data, Principal connectedUser){
-        mealService.deleteById(data, connectedUser);
+        mealService.deleteMealById(data, connectedUser);
 
         return ResponseEntity.noContent().build();
     }
@@ -55,5 +55,12 @@ public class MealController {
         MealResponseDTO response = mealService.addMealFoods(data, connectedUser);
 
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/del-foods")
+    public ResponseEntity<Void> deleteMealFoods(@RequestBody DeleteMealFoodsRequestDTO data, Principal connectedUser){
+        mealService.deleteMealFoodById(data, connectedUser);
+
+        return ResponseEntity.noContent().build();
     }
 }
