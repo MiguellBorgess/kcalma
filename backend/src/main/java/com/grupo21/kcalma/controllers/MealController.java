@@ -1,9 +1,6 @@
 package com.grupo21.kcalma.controllers;
 
-import com.grupo21.kcalma.dto.AddMealRequestDTO;
-import com.grupo21.kcalma.dto.MealByIdRequestDTO;
-import com.grupo21.kcalma.dto.MealResponseDTO;
-import com.grupo21.kcalma.dto.UpdateMealRequestDTO;
+import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.services.MealService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +38,7 @@ public class MealController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteById(@RequestBody MealByIdRequestDTO data, Principal connectedUser){
-        mealService.deleteById(data, connectedUser);
+        mealService.deleteMealById(data, connectedUser);
 
         return ResponseEntity.noContent().build();
     }
@@ -51,5 +48,19 @@ public class MealController {
         MealResponseDTO response = mealService.updateMeal(data, connectedUser);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/add-foods")
+    public ResponseEntity<MealResponseDTO> addMealFoods (@RequestBody AddMealFoodRequestDTO data, Principal connectedUser){
+        MealResponseDTO response = mealService.addMealFoods(data, connectedUser);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/del-foods")
+    public ResponseEntity<Void> deleteMealFoods(@RequestBody DeleteMealFoodsRequestDTO data, Principal connectedUser){
+        mealService.deleteMealFoodById(data, connectedUser);
+
+        return ResponseEntity.noContent().build();
     }
 }
