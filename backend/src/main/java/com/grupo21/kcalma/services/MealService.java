@@ -109,4 +109,36 @@ public class MealService {
         }
         return null; //temporário
     }
+
+    @Transactional
+    public MealResponseDTO addMealFoods(AddMealFoodRequestDTO data, Principal connectedUser) {
+        User user = userService.getAuthenticatedUser(connectedUser);
+
+        Optional<Meal> opMeal = mealRepository.findById(data.mealId());
+
+        if(opMeal.isPresent()) { //trocar por exceção
+            Meal meal = opMeal.get();
+
+            if (meal.getUser().equals(user)) {
+
+                for (MealFoodItemRequestDTO item : data.mealFoods()) {
+                    MealFoodId mealFoodId = new MealFoodId(meal.getId(), item.foodId());
+
+                    Optional<Food> opFood = foodRepository.findById(item.foodId());
+
+                    if (opFood.isPresent()) { //trocar por exceção
+                        Food food = opFood.get();
+
+                        MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount());
+
+                        meal.getMealFoods().add(mealFoods);
+
+
+                    }
+                }
+                return MealResponseDTO.create(mealRepository.save(meal));
+            }
+        }
+        return null; //temporário
+    }
 }

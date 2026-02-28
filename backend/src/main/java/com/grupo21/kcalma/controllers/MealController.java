@@ -1,9 +1,6 @@
 package com.grupo21.kcalma.controllers;
 
-import com.grupo21.kcalma.dto.AddMealRequestDTO;
-import com.grupo21.kcalma.dto.MealByIdRequestDTO;
-import com.grupo21.kcalma.dto.MealResponseDTO;
-import com.grupo21.kcalma.dto.UpdateMealRequestDTO;
+import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.services.MealService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +46,13 @@ public class MealController {
     @PatchMapping("/update")
     public ResponseEntity<MealResponseDTO> updateMeal(@RequestBody UpdateMealRequestDTO data, Principal connectedUser){
         MealResponseDTO response = mealService.updateMeal(data, connectedUser);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/add-foods")
+    public ResponseEntity<MealResponseDTO> addMealFoods (@RequestBody AddMealFoodRequestDTO data, Principal connectedUser){
+        MealResponseDTO response = mealService.addMealFoods(data, connectedUser);
 
         return ResponseEntity.ok(response);
     }
