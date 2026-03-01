@@ -27,4 +27,7 @@ public class MealFoods {
 
     @Column(nullable = false)
     private double amount;
+
+    @Transient
+    private double calories;
 }

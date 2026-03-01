@@ -40,6 +40,7 @@ public class MealService {
 
         Meal meal = mealRepository.save(newMeal);
 
+        double totalCalories = 0;
 
         for (MealFoodItemRequestDTO item : data.mealFoods()) {
             Food food = foodRepository.findById(item.foodId()).orElseThrow(() -> new NotFoundException("Food não encontrado: " + item.foodId()));
@@ -47,11 +48,14 @@ public class MealService {
 
             MealFoodId mealFoodId = new MealFoodId(meal.getId(), food.getId());
 
-            MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount());
+            double calories = food.getCalories()* item.amount();
+            totalCalories+=calories;
+
+            MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount(), calories);
 
             meal.getMealFoods().add(mealFoods);
         }
-        return MealResponseDTO.create(mealRepository.save(meal));
+        return MealResponseDTO.create(mealRepository.save(meal), totalCalories);
     }
 
     public List<MealResponseDTO> getAllMeals(Principal connectedUser) {
@@ -59,7 +63,14 @@ public class MealService {
 
         List<Meal> meals = mealRepository.getAllByUser(user);
 
-        return meals.stream().map(MealResponseDTO::create).collect(Collectors.toList());
+        return meals.stream()
+                .map(meal -> {
+                    double totalCalories = meal.getMealFoods().stream()
+                            .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                            .sum();
+                    return MealResponseDTO.create(meal, totalCalories);
+                })
+                .collect(Collectors.toList());
     }
 
     public MealResponseDTO getMealById(MealByIdRequestDTO data, Principal connectedUser) {
@@ -74,7 +85,12 @@ public class MealService {
         if(!meal.getUser().equals(user)){
             throw new UserNotAllowedException("A refeição não pertence ao usuário.");
         }
-        return MealResponseDTO.create(meal);
+
+        double totalCalories = meal.getMealFoods().stream()
+                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                .sum();
+
+        return MealResponseDTO.create(meal, totalCalories);
     }
 
     public void deleteMealById(MealByIdRequestDTO data, Principal connectedUser) {
@@ -108,7 +124,11 @@ public class MealService {
 
         Meal updatedMeal = mealRepository.save(meal);
 
-        return MealResponseDTO.create(updatedMeal);
+        double totalCalories = updatedMeal.getMealFoods().stream()
+                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                .sum();
+
+        return MealResponseDTO.create(updatedMeal, totalCalories);
     }
 
     @Transactional
@@ -133,11 +153,19 @@ public class MealService {
                 throw new UserNotAllowedException("O alimento não pertence ao usuário.");
             }
 
-            MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount());
-            meal.getMealFoods().add(mealFoods);
+            double calories = food.getCalories()* item.amount();
 
+            MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount(), calories);
+            meal.getMealFoods().add(mealFoods);
         }
-        return MealResponseDTO.create(mealRepository.save(meal));
+
+        Meal savedMeal = mealRepository.save(meal);
+
+        double totalCalories = savedMeal.getMealFoods().stream()
+                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                .sum();
+
+        return MealResponseDTO.create(savedMeal, totalCalories);
     }
 
     public void deleteMealFoodById(DeleteMealFoodsRequestDTO data, Principal connectedUser) {
