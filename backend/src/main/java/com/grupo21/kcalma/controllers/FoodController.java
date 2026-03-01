@@ -16,8 +16,8 @@ public class FoodController {
     private final FoodService foodService;
 
     @PostMapping("/add")
-    public ResponseEntity<FoodResponseDTO> addFood(@RequestBody AddFoodRequestDTO food){
-        FoodResponseDTO response = foodService.addFood(food);
+    public ResponseEntity<List<FoodResponseDTO>> addFood(@RequestBody List<AddFoodRequestDTO> foods){
+        List<FoodResponseDTO> response = foodService.addFoods(foods);
 
         return ResponseEntity.ok(response);
     }

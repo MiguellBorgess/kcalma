@@ -17,14 +17,20 @@ import java.util.stream.Collectors;
 public class FoodService {
     private final FoodRepository foodRepository;
 
-    public FoodResponseDTO addFood(AddFoodRequestDTO dados) {
-        Food food = new Food();
+    public List<FoodResponseDTO> addFoods(List<AddFoodRequestDTO> dadosList) {
+        List<Food> foods = dadosList.stream().map(dados -> {
+            Food food = new Food();
+            food.setName(dados.name());
+            food.setMeasureUnit(dados.measureUnit());
+            food.setCalories(dados.calories());
+            return food;
+        }).toList();
 
-        food.setName(dados.name());
-        food.setMeasureUnit(dados.measureUnit());
-        food.setCalories(dados.calories());
+        List<Food> savedFoods = foodRepository.saveAll(foods);
 
-        return FoodResponseDTO.create(foodRepository.save(food));
+        return savedFoods.stream()
+                .map(FoodResponseDTO::create)
+                .toList();
     }
 
     public List<FoodResponseDTO> getAll() {
