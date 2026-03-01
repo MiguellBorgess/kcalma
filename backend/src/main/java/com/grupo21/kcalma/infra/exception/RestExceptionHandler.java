@@ -19,7 +19,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<RestErrorMessage> notFoundHandle(NotFoundException e) {
         RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.BAD_REQUEST, e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(threatResponse);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(threatResponse);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
@@ -92,5 +92,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<RestErrorMessage> handleIllegalArgumentException(IllegalArgumentException e) {
         RestErrorMessage response = new RestErrorMessage(HttpStatus.BAD_REQUEST, e.getMessage() != null ? e.getMessage() : "Invalid argument");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(UserNotAllowedException.class)
+    public ResponseEntity<RestErrorMessage> handleUserNotAllowed(IllegalArgumentException e){
+        RestErrorMessage response = new RestErrorMessage(HttpStatus.UNAUTHORIZED, e.getMessage() != null ? e.getMessage() : "User not allowed");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 }

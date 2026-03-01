@@ -1,13 +1,12 @@
 package com.grupo21.kcalma.services;
 
 import com.grupo21.kcalma.domain.food.Food;
-import com.grupo21.kcalma.domain.user.User;
 import com.grupo21.kcalma.dto.*;
+import com.grupo21.kcalma.exceptions.NotFoundException;
 import com.grupo21.kcalma.repositories.FoodRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,69 +14,64 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FoodService {
-
-    private final UserService userService;
     private final FoodRepository foodRepository;
 
-    public FoodResponseDTO addFood(AddFoodRequestDTO dados, Principal connectedUser) {
-        User user = userService.getAuthenticatedUser(connectedUser);
-        Food food = new Food();
+    public List<FoodResponseDTO> addFoods(List<AddFoodRequestDTO> dadosList) {
+        List<Food> foods = dadosList.stream().map(dados -> {
+            Food food = new Food();
+            food.setName(dados.name());
+            food.setMeasureUnit(dados.measureUnit());
+            food.setCalories(dados.calories());
+            return food;
+        }).toList();
 
-        food.setName(dados.name());
-        food.setMeasureUnit(dados.measureUnit());
-        food.setUser(user);
-        food.setCalories(dados.calories());
+        List<Food> savedFoods = foodRepository.saveAll(foods);
 
-        return FoodResponseDTO.create(foodRepository.save(food));
+        return savedFoods.stream()
+                .map(FoodResponseDTO::create)
+                .toList();
     }
 
-    public List<FoodResponseDTO> getAll(Principal connectedUser) {
-        User user = userService.getAuthenticatedUser(connectedUser);
-
-        List<Food> foods = foodRepository.getAllByUser(user);
+    public List<FoodResponseDTO> getAll() {
+        List<Food> foods = foodRepository.findAll();
 
         return foods.stream().map(FoodResponseDTO::create).collect(Collectors.toList());
     }
 
-    public FoodResponseDTO getByName(FoodByNameRequestDTO data, Principal connectedUser) {
-        User user = userService.getAuthenticatedUser(connectedUser);
+    public FoodResponseDTO getByName(FoodByNameRequestDTO data) {
+        Food food = foodRepository.findByName(data.name());
 
-        Food food = foodRepository.getByNameAndUser(data.name(), user);
+        if(food==null)
+            throw new NotFoundException("Nenhum alimento encontrado com esse nome e usuário");
 
         return FoodResponseDTO.create(food);
     }
 
-    public void deleteById(DeleteFoodRequestDTO data, Principal connectedUser) {
-        User user = userService.getAuthenticatedUser(connectedUser);
-
+    public void deleteById(DeleteFoodRequestDTO data) {
         Optional<Food> opFood= foodRepository.findById(data.id());
 
-        if(opFood.isPresent()){
-            Food food = opFood.get();
+        if (opFood.isEmpty())
+            throw new NotFoundException("Nenhum alimento encontrado com esse Id.");
 
-            if(food.getUser().equals(user)){
-                foodRepository.deleteById(data.id());
-            }
-        }
+        foodRepository.deleteById(data.id());
     }
     
-    public FoodResponseDTO updateFood(UpdateFoodRequestDTO data, Principal connectedUser){
-        User user = userService.getAuthenticatedUser(connectedUser);
+    public FoodResponseDTO updateFood(UpdateFoodRequestDTO data) {
         Optional<Food> opFood = foodRepository.findById(data.getId());
 
-        if(opFood.isPresent()){
-            Food food = opFood.get();
+        if (opFood.isEmpty())
+            throw new NotFoundException("Nenhum alimento encontrado com esse Id.");
 
-            if(food.getUser().equals(user)){
-                if(data.getName()!=null) food.setName(data.getName());
-                if(data.getMeasureUnit()!=null) food.setMeasureUnit(data.getMeasureUnit());
-                if(data.isUpdateCalories()) food.setCalories(data.getCalories());
+        Food food = opFood.get();
 
-                Food updatedFood = foodRepository.save(food);
+        if (data.getName() != null) food.setName(data.getName());
+        if (data.getMeasureUnit() != null) food.setMeasureUnit(data.getMeasureUnit());
 
-                return FoodResponseDTO.create(updatedFood);
-            }
+        if (data.isUpdateCalories()) {
+            if (data.getCalories() < 0)
+                throw new IllegalArgumentException("As calorias devem ser um valor maior ou igual a zero.");
+            food.setCalories(data.getCalories());
         }
-        return null; //temporário
+        return FoodResponseDTO.create(foodRepository.save(food));
     }
 }

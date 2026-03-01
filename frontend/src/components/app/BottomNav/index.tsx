@@ -21,20 +21,6 @@ export function BottomNav() {
                     </NavLink>
 
                     <NavLink
-                        to="/weight"
-                        className={({ isActive }) =>
-                            `flex flex-col items-center justify-center py-3 px-2 transition-colors ${isActive
-                                ? 'text-[#4CAF50]'
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`
-                        }
-                    >
-                        <Scale size={24} strokeWidth={2} />
-                        <span className="text-xs mt-1">Peso</span>
-                    </NavLink>
-
-
-                    <NavLink
                         to="/calendar"
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center py-3 px-2 transition-colors ${isActive
@@ -45,6 +31,19 @@ export function BottomNav() {
                     >
                         <Calendar size={24} strokeWidth={2} />
                         <span className="text-xs mt-1">Calendário</span>
+                    </NavLink>
+
+                    <NavLink
+                        to="/weight"
+                        className={({ isActive }) =>
+                            `flex flex-col items-center justify-center py-3 px-2 transition-colors ${isActive
+                                ? 'text-[#4CAF50]'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`
+                        }
+                    >
+                        <Scale size={24} strokeWidth={2} />
+                        <span className="text-xs mt-1">Peso</span>
                     </NavLink>
 
                     <NavLink

@@ -6,12 +6,13 @@ import com.grupo21.kcalma.domain.Meal.MealFoods;
 import com.grupo21.kcalma.domain.food.Food;
 import com.grupo21.kcalma.domain.user.User;
 import com.grupo21.kcalma.dto.*;
+import com.grupo21.kcalma.exceptions.NotFoundException;
+import com.grupo21.kcalma.exceptions.UserNotAllowedException;
 import com.grupo21.kcalma.repositories.FoodRepository;
 import com.grupo21.kcalma.repositories.MealRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.security.Principal;
 import java.util.List;
@@ -27,7 +28,7 @@ public class MealService {
     private final FoodRepository foodRepository;
 
     @Transactional
-    public MealResponseDTO addMeal(@RequestBody AddMealRequestDTO data, Principal connectedUser) {
+    public MealResponseDTO addMeal(AddMealRequestDTO data, Principal connectedUser) {
         User user = userService.getAuthenticatedUser(connectedUser);
 
         Meal newMeal = new Meal();
@@ -39,17 +40,22 @@ public class MealService {
 
         Meal meal = mealRepository.save(newMeal);
 
+        double totalCalories = 0;
 
         for (MealFoodItemRequestDTO item : data.mealFoods()) {
-            Food food = foodRepository.findById(item.foodId()).orElseThrow(() -> new RuntimeException("Food não encontrado: " + item.foodId()));
+            Food food = foodRepository.findById(item.foodId()).orElseThrow(() -> new NotFoundException("Food não encontrado: " + item.foodId()));
+            if(item.amount()<=0) throw new IllegalArgumentException("A quantidade do alimento não pode ser nulo/negativo");
 
             MealFoodId mealFoodId = new MealFoodId(meal.getId(), food.getId());
 
-            MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount());
+            double calories = food.getCalories()* item.amount();
+            totalCalories+=calories;
+
+            MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount(), calories);
 
             meal.getMealFoods().add(mealFoods);
         }
-        return MealResponseDTO.create(mealRepository.save(meal));
+        return MealResponseDTO.create(mealRepository.save(meal), totalCalories);
     }
 
     public List<MealResponseDTO> getAllMeals(Principal connectedUser) {
@@ -57,7 +63,14 @@ public class MealService {
 
         List<Meal> meals = mealRepository.getAllByUser(user);
 
-        return meals.stream().map(MealResponseDTO::create).collect(Collectors.toList());
+        return meals.stream()
+                .map(meal -> {
+                    double totalCalories = meal.getMealFoods().stream()
+                            .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                            .sum();
+                    return MealResponseDTO.create(meal, totalCalories);
+                })
+                .collect(Collectors.toList());
     }
 
     public MealResponseDTO getMealById(MealByIdRequestDTO data, Principal connectedUser) {
@@ -65,14 +78,19 @@ public class MealService {
 
         Optional<Meal> opMeal = mealRepository.findById(data.id());
 
-        if(opMeal.isPresent()){
-            Meal meal = opMeal.get();
+        if(opMeal.isEmpty()) throw new NotFoundException("Nenhuma refeição encontrada com esse Id");
 
-            if(meal.getUser().equals(user)){
-                return MealResponseDTO.create(meal);
-            }
+        Meal meal = opMeal.get();
+
+        if(!meal.getUser().equals(user)){
+            throw new UserNotAllowedException("A refeição não pertence ao usuário.");
         }
-        return null; //temporário
+
+        double totalCalories = meal.getMealFoods().stream()
+                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                .sum();
+
+        return MealResponseDTO.create(meal, totalCalories);
     }
 
     public void deleteMealById(MealByIdRequestDTO data, Principal connectedUser) {
@@ -80,13 +98,13 @@ public class MealService {
 
         Optional<Meal> opMeal = mealRepository.findById(data.id());
 
-        if(opMeal.isPresent()){
-            Meal meal = opMeal.get();
+        if(opMeal.isEmpty()) throw new NotFoundException("Nenhuma refeição encontrada com esse Id");
 
-            if(meal.getUser().equals(user)){
-                mealRepository.deleteById(data.id());
-            }
-        }
+        Meal meal = opMeal.get();
+
+        if(!meal.getUser().equals(user)) throw new UserNotAllowedException("A refeição não pertence ao usuário.");
+
+        mealRepository.deleteById(data.id());
     }
 
     public MealResponseDTO updateMeal(UpdateMealRequestDTO data, Principal connectedUser) {
@@ -94,20 +112,23 @@ public class MealService {
 
         Optional<Meal> opMeal = mealRepository.findById(data.id());
 
-        if(opMeal.isPresent()){
-            Meal meal = opMeal.get();
+        if (opMeal.isEmpty()) throw new NotFoundException("Nenhuma refeição encontrada com esse Id");
 
-            if(meal.getUser().equals(user)){
-                if(data.name()!=null) meal.setName(data.name());
-                if(data.description()!=null) meal.setDescription(data.description());
-                if(data.mealType()!=null) meal.setMealType(data.mealType());
+        Meal meal = opMeal.get();
 
-                Meal updatedMeal = mealRepository.save(meal);
+        if (!meal.getUser().equals(user)) throw new UserNotAllowedException("A refeição não pertence ao usuário.");
 
-                return MealResponseDTO.create(updatedMeal);
-            }
-        }
-        return null; //temporário
+        if (data.name() != null) meal.setName(data.name());
+        if (data.description() != null) meal.setDescription(data.description());
+        if (data.mealType() != null) meal.setMealType(data.mealType());
+
+        Meal updatedMeal = mealRepository.save(meal);
+
+        double totalCalories = updatedMeal.getMealFoods().stream()
+                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                .sum();
+
+        return MealResponseDTO.create(updatedMeal, totalCalories);
     }
 
     @Transactional
@@ -116,30 +137,31 @@ public class MealService {
 
         Optional<Meal> opMeal = mealRepository.findById(data.mealId());
 
-        if(opMeal.isPresent()) { //trocar por exceção
-            Meal meal = opMeal.get();
+        if (opMeal.isEmpty()) throw new NotFoundException("Nenhuma refeição encontrada com esse Id");
 
-            if (meal.getUser().equals(user)) {
+        Meal meal = opMeal.get();
 
-                for (MealFoodItemRequestDTO item : data.mealFoods()) {
-                    MealFoodId mealFoodId = new MealFoodId(meal.getId(), item.foodId());
+        if (!meal.getUser().equals(user)) throw new UserNotAllowedException("A refeição não pertence ao usuário.");
 
-                    Optional<Food> opFood = foodRepository.findById(item.foodId());
+        for (MealFoodItemRequestDTO item : data.mealFoods()) {
+            MealFoodId mealFoodId = new MealFoodId(meal.getId(), item.foodId());
+            if(item.amount()<=0) throw new IllegalArgumentException("A quantidade do alimento não pode ser nulo/negativo");
 
-                    if (opFood.isPresent()) { //trocar por exceção
-                        Food food = opFood.get();
+            Food food = foodRepository.findById(item.foodId()).orElseThrow(() -> new NotFoundException("Food não encontrado: " + item.foodId()));
 
-                        MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount());
+            double calories = food.getCalories()* item.amount();
 
-                        meal.getMealFoods().add(mealFoods);
-
-
-                    }
-                }
-                return MealResponseDTO.create(mealRepository.save(meal));
-            }
+            MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount(), calories);
+            meal.getMealFoods().add(mealFoods);
         }
-        return null; //temporário
+
+        Meal savedMeal = mealRepository.save(meal);
+
+        double totalCalories = savedMeal.getMealFoods().stream()
+                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                .sum();
+
+        return MealResponseDTO.create(savedMeal, totalCalories);
     }
 
     public void deleteMealFoodById(DeleteMealFoodsRequestDTO data, Principal connectedUser) {
@@ -147,21 +169,22 @@ public class MealService {
 
         Optional<Meal> opMeal = mealRepository.findById(data.mealId());
 
-        if(opMeal.isPresent()){
-            Meal meal = opMeal.get();
+        if (opMeal.isEmpty()) throw new NotFoundException("Nenhuma refeição encontrada com esse Id");
 
-            if(meal.getUser().equals(user)){
+        Meal meal = opMeal.get();
 
-                for(Long item:data.foodsId()){
+        if (!meal.getUser().equals(user)) throw new UserNotAllowedException("A refeição não pertence ao usuário.");
 
-                    Optional<MealFoods> opMealFoods = meal.getMealFoods().stream()
-                            .filter(mealFoods -> mealFoods.getFood().getId().equals(item))
-                            .findFirst();
+        for(Long item:data.foodsId()){
 
-                    opMealFoods.ifPresent(mealFoods -> meal.getMealFoods().remove(mealFoods));
-                }
-                mealRepository.save(meal);
-            }
+            Optional<MealFoods> opMealFoods = meal.getMealFoods().stream()
+                    .filter(mealFoods -> mealFoods.getFood().getId().equals(item))
+                    .findFirst();
+
+            if(opMealFoods.isEmpty()) throw new NotFoundException("Nenhum alimento encontrado nessa refeição");
+
+            opMealFoods.ifPresent(mealFoods -> meal.getMealFoods().remove(mealFoods));
         }
+        mealRepository.save(meal);
     }
 }

@@ -4,6 +4,8 @@ import com.grupo21.kcalma.domain.user.User;
 import com.grupo21.kcalma.domain.weightRecord.WeightRecord;
 import com.grupo21.kcalma.dto.*;
 import com.grupo21.kcalma.exceptions.ChangePasswordException;
+import com.grupo21.kcalma.exceptions.NotFoundException;
+import com.grupo21.kcalma.exceptions.UserNotAllowedException;
 import com.grupo21.kcalma.exceptions.UserNotFoundException;
 import com.grupo21.kcalma.repositories.UserRepository;
 import com.grupo21.kcalma.repositories.WeightRecordRepository;
@@ -82,6 +84,7 @@ public class UserService {
     @Transactional
     public WeightRecordResponseDTO addWeightRecord(AddWeightRecordRequestDTO data, Principal connectedUser){
         User user = getAuthenticatedUser(connectedUser);
+        if(data.pesoKg()<=0) throw new IllegalArgumentException("O peso não pode ser menor ou igual a 0");
 
         WeightRecord record = new WeightRecord();
         record.setPesoKg(data.pesoKg());
@@ -96,27 +99,13 @@ public class UserService {
     public void DeleteWeightRecord(DeleteWeightRecordRequestDTO data, Principal connectedUser) {
         User user = getAuthenticatedUser(connectedUser);
 
-        Optional<WeightRecord> OpRecord = weightRepository.findById(data.id());
+        WeightRecord record = weightRepository.findById(data.id()).orElseThrow(() -> new NotFoundException("Weight Record não encontrado"));
 
-        if(OpRecord.isPresent()){
-            WeightRecord record = OpRecord.get();
+            if (!record.getUser().equals(user))
+                throw new UserNotAllowedException("Essa Weight Record não pertence a esse usuário");
 
-            if (record.getUser().equals(user)){
-                try{
-                    weightRepository.delete(record);
-                } catch (Exception e) {
-                    throw new RuntimeException("Erro interno do sistema", e);
-                }
-            }
-            else{
-                throw new RuntimeException("Id não pertence ao usuário");
-            }
+            weightRepository.delete(record);
         }
-
-        else{
-            throw new RuntimeException("Id não encontrado");
-        }
-    }
 
     public List<WeightRecordResponseDTO> getWeightRecords(Principal connectedUser) {
         User user = getAuthenticatedUser(connectedUser);
