@@ -24,10 +24,6 @@ public class Food {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; //Analisar se vai manter
-
     @Column(name = "measure_unit")
     private MeasureUnit measureUnit;
 

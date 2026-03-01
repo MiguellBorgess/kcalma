@@ -16,34 +16,34 @@ public class FoodController {
     private final FoodService foodService;
 
     @PostMapping("/add")
-    public ResponseEntity<FoodResponseDTO> addFood(@RequestBody AddFoodRequestDTO food, Principal connectedUser){
-        FoodResponseDTO response = foodService.addFood(food, connectedUser);
+    public ResponseEntity<List<FoodResponseDTO>> addFood(@RequestBody List<AddFoodRequestDTO> foods){
+        List<FoodResponseDTO> response = foodService.addFoods(foods);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<List<FoodResponseDTO>> getAll(Principal connectedUser){
-        List<FoodResponseDTO> response = foodService.getAll(connectedUser);
+    public ResponseEntity<List<FoodResponseDTO>> getAll(){
+        List<FoodResponseDTO> response = foodService.getAll();
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/get")
-    public ResponseEntity<FoodResponseDTO> getByName(@RequestBody FoodByNameRequestDTO data, Principal connectedUser){
-        FoodResponseDTO response = foodService.getByName(data, connectedUser);
+    public ResponseEntity<FoodResponseDTO> getByName(@RequestBody FoodByNameRequestDTO data){
+        FoodResponseDTO response = foodService.getByName(data);
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete")
-    public void deleteById(@RequestBody DeleteFoodRequestDTO data, Principal connectedUser){
-        foodService.deleteById(data, connectedUser);
+    public void deleteById(@RequestBody DeleteFoodRequestDTO data){
+        foodService.deleteById(data);
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<FoodResponseDTO> updateFood(@RequestBody UpdateFoodRequestDTO data, Principal connectedUser){
-        FoodResponseDTO response = foodService.updateFood(data, connectedUser);
+    public ResponseEntity<FoodResponseDTO> updateFood(@RequestBody UpdateFoodRequestDTO data){
+        FoodResponseDTO response = foodService.updateFood(data);
 
         return ResponseEntity.ok(response);
     }

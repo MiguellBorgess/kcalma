@@ -149,10 +149,6 @@ public class MealService {
 
             Food food = foodRepository.findById(item.foodId()).orElseThrow(() -> new NotFoundException("Food não encontrado: " + item.foodId()));
 
-            if(!food.getUser().equals(user)){
-                throw new UserNotAllowedException("O alimento não pertence ao usuário.");
-            }
-
             double calories = food.getCalories()* item.amount();
 
             MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount(), calories);
