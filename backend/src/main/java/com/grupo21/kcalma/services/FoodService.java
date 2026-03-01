@@ -15,68 +15,51 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FoodService {
-
-    private final UserService userService;
     private final FoodRepository foodRepository;
 
-    public FoodResponseDTO addFood(AddFoodRequestDTO dados, Principal connectedUser) {
-        User user = userService.getAuthenticatedUser(connectedUser);
+    public FoodResponseDTO addFood(AddFoodRequestDTO dados) {
         Food food = new Food();
 
         food.setName(dados.name());
         food.setMeasureUnit(dados.measureUnit());
-        food.setUser(user);
         food.setCalories(dados.calories());
 
         return FoodResponseDTO.create(foodRepository.save(food));
     }
 
-    public List<FoodResponseDTO> getAll(Principal connectedUser) {
-        User user = userService.getAuthenticatedUser(connectedUser);
-
-        List<Food> foods = foodRepository.getAllByUser(user);
+    public List<FoodResponseDTO> getAll() {
+        List<Food> foods = foodRepository.findAll();
 
         return foods.stream().map(FoodResponseDTO::create).collect(Collectors.toList());
     }
 
-    public FoodResponseDTO getByName(FoodByNameRequestDTO data, Principal connectedUser) {
-        User user = userService.getAuthenticatedUser(connectedUser);
-
-        Food food = foodRepository.getByNameAndUser(data.name(), user);
+    public FoodResponseDTO getByName(FoodByNameRequestDTO data) {
+        Food food = foodRepository.findByName(data.name());
 
         return FoodResponseDTO.create(food);
     }
 
-    public void deleteById(DeleteFoodRequestDTO data, Principal connectedUser) {
-        User user = userService.getAuthenticatedUser(connectedUser);
-
+    public void deleteById(DeleteFoodRequestDTO data) {
         Optional<Food> opFood= foodRepository.findById(data.id());
 
         if(opFood.isPresent()){
-            Food food = opFood.get();
-
-            if(food.getUser().equals(user)){
-                foodRepository.deleteById(data.id());
-            }
+            foodRepository.deleteById(data.id());
         }
     }
     
-    public FoodResponseDTO updateFood(UpdateFoodRequestDTO data, Principal connectedUser){
-        User user = userService.getAuthenticatedUser(connectedUser);
+    public FoodResponseDTO updateFood(UpdateFoodRequestDTO data){
         Optional<Food> opFood = foodRepository.findById(data.getId());
 
         if(opFood.isPresent()){
             Food food = opFood.get();
 
-            if(food.getUser().equals(user)){
-                if(data.getName()!=null) food.setName(data.getName());
-                if(data.getMeasureUnit()!=null) food.setMeasureUnit(data.getMeasureUnit());
-                if(data.isUpdateCalories()) food.setCalories(data.getCalories());
+            if(data.getName()!=null) food.setName(data.getName());
+            if(data.getMeasureUnit()!=null) food.setMeasureUnit(data.getMeasureUnit());
+            if(data.isUpdateCalories()) food.setCalories(data.getCalories());
 
-                Food updatedFood = foodRepository.save(food);
+            Food updatedFood = foodRepository.save(food);
 
-                return FoodResponseDTO.create(updatedFood);
-            }
+            return FoodResponseDTO.create(updatedFood);
         }
         return null; //temporário
     }
