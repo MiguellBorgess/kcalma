@@ -42,7 +42,7 @@ public class FoodService {
         Food food = foodRepository.findByName(data.name());
 
         if(food==null)
-            throw new NotFoundException("Nenhum alimento encontrado com esse nome e usuário");
+            throw new NotFoundException("Nenhum alimento encontrado com esse nome");
 
         return FoodResponseDTO.create(food);
     }
