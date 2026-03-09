@@ -70,4 +70,11 @@ public class MealController {
 
         return  ResponseEntity.ok(response);
     }
+
+    @GetMapping("/average-calories")
+    public ResponseEntity<MonthlyCaloriesAverageResponseDTO> getMonthlyAverageCalories(@RequestParam int year, @RequestParam int month, Principal connectedUser){
+        MonthlyCaloriesAverageResponseDTO response = mealService.getMonthlyAverageCalories(year, month, connectedUser);
+
+        return ResponseEntity.ok(response);
+    }
 }
