@@ -5,24 +5,10 @@ import { Label } from "@/components/ui/label";
 import { useFoodData } from "@/hooks/useFood";
 import { useAddMeal } from "@/hooks/useMeal";
 import type { FoodData } from "@/interfaces/food";
-import type { MealItem } from "@/interfaces/meal";
+import { MEAL_TYPES, UNITS, type MealItem } from "@/interfaces/meal";
 import { Plus, Save, Search, Trash2, Utensils } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-
-const UNITS = [
-    { value: 'GRAM', label: 'Gramas (g)' },
-    { value: 'KILOGRAM', label: 'Quilogramas (kg)' },
-    { value: 'MILLILITER', label: 'Mililitros (ml)' },
-]
-
-const MEAL_TYPES = [
-    { value: 'BREAKFAST', label: 'Café da manhã' },
-    { value: 'LUNCH', label: 'Almoço' },
-    { value: 'DINNER', label: 'Jantar' },
-    { value: 'SNACK', label: 'Lanche' },
-    { value: 'OTHER', label: 'Outro' },
-]
 
 export function Home() {
     const [selectedFood, setSelectedFood] = useState<FoodData | null>(null)
@@ -128,8 +114,6 @@ export function Home() {
             return
         }
 
-        console.log(formData)
-
         mutate({
             name: formData.name,
             description: formData.description,
@@ -156,6 +140,11 @@ export function Home() {
 
 
         toast.success('Refeição salva com sucesso!')
+    }
+
+    const getUnitTypeLabel = (type: string): string => {
+        const unit = UNITS.find(mt => mt.value === type)
+        return unit?.label || type
     }
 
     return (
@@ -319,7 +308,7 @@ export function Home() {
                                         <div className="flex-1">
                                             <div className="font-medium text-gray-800">{item.name}</div>
                                             <div className="text-sm text-gray-500">
-                                                {item.amount} {item.unit} • {item.calories} kcal
+                                                {item.amount} {getUnitTypeLabel(item.unit)} • {item.calories} kcal
                                             </div>
                                         </div>
                                         <Button
