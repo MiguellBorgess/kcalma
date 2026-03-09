@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -50,6 +51,13 @@ public class MealController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/update-complete")
+    public ResponseEntity<MealResponseDTO> updateMealComplete(@RequestBody UpdateMealCompleteRequestDTO data, Principal connectedUser){
+        MealResponseDTO response = mealService.updateMealComplete(data, connectedUser);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/add-foods")
     public ResponseEntity<MealResponseDTO> addMealFoods (@RequestBody AddMealFoodRequestDTO data, Principal connectedUser){
         MealResponseDTO response = mealService.addMealFoods(data, connectedUser);
@@ -65,8 +73,8 @@ public class MealController {
     }
 
     @GetMapping("/get-date")
-    public ResponseEntity<List<MealResponseDTO>> getMealByDate(@RequestBody MealByDateRequestDTO data, Principal connectedUser){
-        List<MealResponseDTO> response = mealService.getMealByDate(data, connectedUser);
+    public ResponseEntity<List<MealResponseDTO>> getMealByDate(@RequestParam LocalDate date, Principal connectedUser){
+        List<MealResponseDTO> response = mealService.getMealByDate(date, connectedUser);
 
         return  ResponseEntity.ok(response);
     }
@@ -74,6 +82,13 @@ public class MealController {
     @GetMapping("/average-calories")
     public ResponseEntity<MonthlyCaloriesAverageResponseDTO> getMonthlyAverageCalories(@RequestParam int year, @RequestParam int month, Principal connectedUser){
         MonthlyCaloriesAverageResponseDTO response = mealService.getMonthlyAverageCalories(year, month, connectedUser);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/month-calories")
+    public ResponseEntity<List<CaloriesByDateDTO>> getMonthCalories(@RequestParam int year, @RequestParam int month, Principal connectedUser){
+        List<CaloriesByDateDTO> response = mealService.getCaloriesByMonth(year, month, connectedUser);
 
         return ResponseEntity.ok(response);
     }

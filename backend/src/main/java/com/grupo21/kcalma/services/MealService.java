@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public class MealService {
         return meals.stream()
                 .map(meal -> {
                     double totalCalories = meal.getMealFoods().stream()
-                            .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                            .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount() / 100)
                             .sum();
                     return MealResponseDTO.create(meal, totalCalories);
                 })
@@ -87,7 +88,7 @@ public class MealService {
         }
 
         double totalCalories = meal.getMealFoods().stream()
-                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount() / 100)
                 .sum();
 
         return MealResponseDTO.create(meal, totalCalories);
@@ -125,7 +126,7 @@ public class MealService {
         Meal updatedMeal = mealRepository.save(meal);
 
         double totalCalories = updatedMeal.getMealFoods().stream()
-                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount() / 100)
                 .sum();
 
         return MealResponseDTO.create(updatedMeal, totalCalories);
@@ -149,7 +150,7 @@ public class MealService {
 
             Food food = foodRepository.findById(item.foodId()).orElseThrow(() -> new NotFoundException("Food não encontrado: " + item.foodId()));
 
-            double calories = food.getCalories()* item.amount() / 100;
+            double calories = food.getCalories() * item.amount() / 100;
 
             MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount(), calories);
             meal.getMealFoods().add(mealFoods);
@@ -158,7 +159,7 @@ public class MealService {
         Meal savedMeal = mealRepository.save(meal);
 
         double totalCalories = savedMeal.getMealFoods().stream()
-                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount() / 100)
                 .sum();
 
         return MealResponseDTO.create(savedMeal, totalCalories);
@@ -188,18 +189,18 @@ public class MealService {
         mealRepository.save(meal);
     }
 
-    public List<MealResponseDTO> getMealByDate(MealByDateRequestDTO data, Principal connectedUser) {
+    public List<MealResponseDTO> getMealByDate(LocalDate date, Principal connectedUser) {
         User user = userService.getAuthenticatedUser(connectedUser);
 
-        LocalDateTime startOfDay =  data.date().atStartOfDay();
-        LocalDateTime endOfDay = data.date().plusDays(1).atStartOfDay();
+        LocalDateTime startOfDay =  date.atStartOfDay();
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
 
         List<Meal> meals = mealRepository.findByUserAndCreatedAtBetween(user, startOfDay, endOfDay) ;
 
         return meals.stream()
                 .map(meal -> {
                     double totalCalories = meal.getMealFoods().stream()
-                            .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                            .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount() / 100)
                             .sum();
                     return MealResponseDTO.create(meal, totalCalories);
                 })
@@ -216,5 +217,60 @@ public class MealService {
         );
 
         return new MonthlyCaloriesAverageResponseDTO(avg);
+    }
+
+    @Transactional
+    public MealResponseDTO updateMealComplete(UpdateMealCompleteRequestDTO data, Principal connectedUser) {
+
+        User user = userService.getAuthenticatedUser(connectedUser);
+
+        Meal meal = mealRepository.findById(data.mealId())
+                .orElseThrow(() -> new NotFoundException("Nenhuma refeição encontrada com esse Id"));
+
+        if(!meal.getUser().equals(user)){
+            throw new UserNotAllowedException("A refeição não pertence ao usuário.");
+        }
+
+        if(data.name() != null) meal.setName(data.name());
+        if(data.description() != null) meal.setDescription(data.description());
+        if(data.mealType() != null) meal.setMealType(data.mealType());
+
+        meal.getMealFoods().clear();
+
+        double totalCalories = 0;
+
+        for (MealFoodItemRequestDTO item : data.mealFoods()) {
+
+            if(item.amount() <= 0)
+                throw new IllegalArgumentException("A quantidade deve ser maior que zero");
+
+            Food food = foodRepository.findById(item.foodId())
+                    .orElseThrow(() -> new NotFoundException("Food não encontrado: " + item.foodId()));
+
+            MealFoodId mealFoodId = new MealFoodId(meal.getId(), food.getId());
+
+            double calories = (food.getCalories() / 100.0) * item.amount();
+            totalCalories += calories;
+
+            MealFoods mealFoods = new MealFoods(
+                    mealFoodId,
+                    meal,
+                    food,
+                    item.amount(),
+                    calories
+            );
+
+            meal.getMealFoods().add(mealFoods);
+        }
+
+        Meal savedMeal = mealRepository.save(meal);
+
+        return MealResponseDTO.create(savedMeal, totalCalories);
+    }
+
+    public List<CaloriesByDateDTO> getCaloriesByMonth(int year, int month, Principal connectedUser) {
+        User user = userService.getAuthenticatedUser(connectedUser);
+
+        return mealRepository.getCaloriesByDate(user.getId(), year, month);
     }
 }
