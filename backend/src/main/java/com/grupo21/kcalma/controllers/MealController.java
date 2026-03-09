@@ -63,4 +63,11 @@ public class MealController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/get-date")
+    public ResponseEntity<List<MealResponseDTO>> getMealByDate(@RequestBody MealByDateRequestDTO data, Principal connectedUser){
+        List<MealResponseDTO> response = mealService.getMealByDate(data, connectedUser);
+
+        return  ResponseEntity.ok(response);
+    }
 }

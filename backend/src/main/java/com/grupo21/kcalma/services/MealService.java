@@ -15,9 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -70,7 +70,7 @@ public class MealService {
                             .sum();
                     return MealResponseDTO.create(meal, totalCalories);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public MealResponseDTO getMealById(MealByIdRequestDTO data, Principal connectedUser) {
@@ -186,5 +186,23 @@ public class MealService {
             opMealFoods.ifPresent(mealFoods -> meal.getMealFoods().remove(mealFoods));
         }
         mealRepository.save(meal);
+    }
+
+    public List<MealResponseDTO> getMealByDate(MealByDateRequestDTO data, Principal connectedUser) {
+        User user = userService.getAuthenticatedUser(connectedUser);
+
+        LocalDateTime startOfDay =  data.date().atStartOfDay();
+        LocalDateTime endOfDay = data.date().plusDays(1).atStartOfDay();
+
+        List<Meal> meals = mealRepository.findByUserAndCreatedAtBetween(user, startOfDay, endOfDay) ;
+
+        return meals.stream()
+                .map(meal -> {
+                    double totalCalories = meal.getMealFoods().stream()
+                            .mapToDouble(mealFoods -> mealFoods.getFood().getCalories() * mealFoods.getAmount())
+                            .sum();
+                    return MealResponseDTO.create(meal, totalCalories);
+                })
+                .toList();
     }
 }

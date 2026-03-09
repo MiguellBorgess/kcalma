@@ -1,6 +1,5 @@
 package com.grupo21.kcalma.domain.food;
 
-import com.grupo21.kcalma.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
