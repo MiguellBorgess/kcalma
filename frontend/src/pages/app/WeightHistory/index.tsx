@@ -1,6 +1,6 @@
 import { WeightRecordCard } from "@/components/app/WeightRecordCard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { Context } from "@/context/AuthContext";
 import { useAddWeight, useDeleteWeight, useWeightRecordsData } from "@/hooks/useWeightRecord";
 import { Minus, Plus, Scale, TrendingDown, TrendingUp } from "lucide-react";
 import { useContext, useState } from "react";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 
 export default function WeightHistory() {
@@ -21,6 +22,18 @@ export default function WeightHistory() {
 
     const addWeightMutation = useAddWeight()
     const deleteWeightMutation = useDeleteWeight()
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString)
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+    }
+
+    const chartData = [...weightEntries]
+        .reverse()
+        .map(entry => ({
+            date: formatDate(entry.createdAt),
+            peso: entry.pesoKg,
+        }));
 
     const calculateBMI = (weight: number): number | null => {
         const alturaEmMetros = parseInt(user?.altura || '0') / 100
@@ -127,6 +140,43 @@ export default function WeightHistory() {
                     </DialogContent>
                 </Dialog>
             </div>
+
+            {weightEntries.length > 0 && (
+                <Card className="mb-6">
+                    <CardHeader>
+                        <CardTitle>Evolução do Peso</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={chartData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis
+                                        dataKey="date"
+                                        tick={{ fontSize: 12 }}
+                                        angle={-45}
+                                        textAnchor="end"
+                                        height={60}
+                                    />
+                                    <YAxis
+                                        domain={['dataMin - 2', 'dataMax + 2']}
+                                        tick={{ fontSize: 12 }}
+                                    />
+                                    <Tooltip />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="peso"
+                                        stroke="#4CAF50"
+                                        strokeWidth={2}
+                                        dot={{ fill: '#4CAF50', r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {weightEntries.length === 0 ? (
                 <Card>
