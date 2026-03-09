@@ -48,7 +48,7 @@ public class MealService {
 
             MealFoodId mealFoodId = new MealFoodId(meal.getId(), food.getId());
 
-            double calories = food.getCalories()* item.amount();
+            double calories = food.getCalories()* item.amount() / 100;
             totalCalories+=calories;
 
             MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount(), calories);
@@ -149,7 +149,7 @@ public class MealService {
 
             Food food = foodRepository.findById(item.foodId()).orElseThrow(() -> new NotFoundException("Food não encontrado: " + item.foodId()));
 
-            double calories = food.getCalories()* item.amount();
+            double calories = food.getCalories()* item.amount() / 100;
 
             MealFoods mealFoods = new MealFoods(mealFoodId, meal, food, item.amount(), calories);
             meal.getMealFoods().add(mealFoods);
@@ -204,5 +204,17 @@ public class MealService {
                     return MealResponseDTO.create(meal, totalCalories);
                 })
                 .toList();
+    }
+
+    public MonthlyCaloriesAverageResponseDTO getMonthlyAverageCalories(int year, int month, Principal connectedUser) {
+        User user = userService.getAuthenticatedUser(connectedUser);
+
+        Double avg = mealRepository.getAverageCaloriesByMonth(
+                user.getId(),
+                year,
+                month
+        );
+
+        return new MonthlyCaloriesAverageResponseDTO(avg);
     }
 }
