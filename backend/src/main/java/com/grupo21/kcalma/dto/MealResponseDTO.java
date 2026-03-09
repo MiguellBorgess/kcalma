@@ -18,7 +18,7 @@ public record MealResponseDTO(Long id, String name, String description, MealType
                             food.getId(),
                             food.getName(),
                             mealFoods.getAmount(),
-                            mealFoods.getFood().getCalories() * mealFoods.getAmount(),
+                            mealFoods.getFood().getCalories() * mealFoods.getAmount() / 100,
                             food.getMeasureUnit()
                     );
                 })

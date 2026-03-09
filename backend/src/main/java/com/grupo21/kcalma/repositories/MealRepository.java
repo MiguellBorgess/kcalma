@@ -2,6 +2,7 @@ package com.grupo21.kcalma.repositories;
 
 import com.grupo21.kcalma.domain.Meal.Meal;
 import com.grupo21.kcalma.domain.user.User;
+import com.grupo21.kcalma.dto.CaloriesByDateDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +30,18 @@ public interface MealRepository extends JpaRepository<Meal, Long> {
     ) as daily
     """, nativeQuery = true)
     Double getAverageCaloriesByMonth(@Param("userId") String userId, @Param("year") int year, @Param("month") int month);
+
+    @Query(value = """
+    SELECT DATE(m.created_at) as date,
+           SUM((f.calories / 100.0) * mf.amount) as calories
+    FROM meals m
+    JOIN meals_foods mf ON mf.meal_id = m.meal_id
+    JOIN foods f ON f.food_id = mf.food_id
+    WHERE m.user_id = :userId
+    AND YEAR(m.created_at) = :year
+    AND MONTH(m.created_at) = :month
+    GROUP BY DATE(m.created_at)
+    ORDER BY DATE(m.created_at)
+    """, nativeQuery = true)
+    List<CaloriesByDateDTO> getCaloriesByDate(String userId, int year, int month);
 }
