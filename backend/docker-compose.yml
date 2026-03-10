@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mysql:lts
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      timeout: 5s
+      retries: 10
+  app:
+    build: .
+    container_name: kcalma_backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:${DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+
+    develop:
+      watch:
+        - action: rebuild
+          path: ./src
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
